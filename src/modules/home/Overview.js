@@ -10,6 +10,29 @@ const Container = styled.div`
     width:100%;
 `;
 
+const ExpenseContainer = styled.div`
+    display:flex;
+    flex-direction:row;
+    align-items:center;
+    margin:20px;
+    gap:12px;
+`;
+
+const ExpenseBox = styled.div`
+    display:flex;
+    flex-direction:column;
+    border-radius:4px;
+    border:1px solid gray;
+    padding:15px 20px;
+    width:135px;
+    font-size:14px;
+    & span{
+        font-weight:bold;
+        font-size:20px;
+        color: ${props => props.isIncome? "green":"red"};
+    }
+`;
+
 const BalancedBox = styled.div`
     display: flex;
     justify-content: space-between;
@@ -63,13 +86,13 @@ const AddTxnView = (props) =>{
     const [type, setType] = useState("EXPENSE");
 
     const addTransaction = () =>{
-        console.log(amount, desc, type);
-        props.toggleTxn();
+        props.addTransaction({amount:Number(amount), desc, type, id:Date.now()});
+        props.toggleAddTxn();
     };
 
     return (
         <AddTransactionContainer>
-            <input placeholder="Amount" value={amount} onChange={(e) => setAmount(e.target.value)}/>
+            <input placeholder="Amount" type="number" value={amount} onChange={(e) => setAmount(e.target.value)}/>
             <input placeholder="Description" value={desc} onChange={(e) => setDescription(e.target.value)}/>
             <RadioBox>
                 <input type="radio" id="expense" name="type" value="EXPENSE" checked={type==="EXPENSE"} onChange={(e) => {setType(e.target.value)}}/>
@@ -84,14 +107,23 @@ const AddTxnView = (props) =>{
 };
 
 const OverviewComponent = (props) =>{
-    const [isAddTxnVisible, toggleTxn] = useState(false);
+    const [isAddTxnVisible, toggleAddTxn] = useState(false);
     return(
         <Container>
             <BalancedBox>
-                Balanced: Rs.10000
-                <AddTransaction onClick={()=>toggleTxn(!isAddTxnVisible)}>{isAddTxnVisible?"Cancel":"Add"}</AddTransaction>
+                Balanced: ₹ {props.income - props.expense}
+                <AddTransaction onClick={()=>toggleAddTxn(!isAddTxnVisible)}>{isAddTxnVisible?"Cancel":"Add"}</AddTransaction>
             </BalancedBox>
-            {isAddTxnVisible && <AddTxnView toggleTxn={toggleTxn}/>}
+            {isAddTxnVisible && <AddTxnView toggleAddTxn={toggleAddTxn} addTransaction={props.addTransaction}/>}
+
+            <ExpenseContainer>
+                <ExpenseBox isIncome={false}>
+                    Expense<span>₹ {props.expense}</span>
+                </ExpenseBox>
+                <ExpenseBox isIncome={true}>
+                    Income<span>₹ {props.income}</span>
+                </ExpenseBox>
+            </ExpenseContainer>
         </Container>
     )
 }
