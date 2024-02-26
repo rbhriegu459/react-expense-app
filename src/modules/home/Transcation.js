@@ -1,9 +1,9 @@
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 
 const Container = styled.div`
     display:flex;
     flex-direction:column;
-    align-items:center;
     font-family:Montserrat;
     padding:10px 20px;
     font-size:18px;
@@ -46,14 +46,34 @@ const TransactionCell = (props) =>{
 };
 
 const TransactionComponent = (props) =>{
+    const [searchText, updateSearchText] = useState("");
+    const [filteredTransaction, updateTxn] = useState(props.transaction);
+
+    const filterData = (searchText) => {
+        if(!searchText){
+            updateTxn(props.transaction);
+            return;
+        }
+        let txn = [...props.transaction];
+        txn= txn.filter((payload) => 
+            payload.desc.toLowerCase().includes(searchText.toLowerCase().trim())
+        );
+        updateTxn(txn);
+    };
+
+    useEffect(() => filterData(searchText), [props.transaction]);
+
     return(
         <Container>
             Transactions
-            <input placeholder="Search"/>
-            {props.transaction?.length?
-                props.transaction.map((payload)=>(
+            <input placeholder="Search" onChange={(e) => {
+                updateSearchText(e.target.value)
+                filterData(e.target.value);
+            }}/>
+            {filteredTransaction?.length?
+                filteredTransaction.map((payload)=>(
                     <TransactionCell payload={payload}/>))
-            :""}
+            :"No Transaction"}
         </Container>
     )
 }
